@@ -18,7 +18,7 @@ const pw = "A571C1DDA73DD";
 
 // This section does not apply when using scripts on the web
 
-const crypto = require('crypto');
+// const crypto = require('crypto');
 
 
 
@@ -46,8 +46,8 @@ function salt_and_hash(salt) {
   //var pw = document.getElementById('password').value;
   let saltedPassword = salt.concat(pw);
   
-  //let hashed = CryptoJS.MD5(saltedPassword).toString();            // HTML VERSION
-  let hashed = crypo.createHash('md5').update(saltedPassword).digest('hex');     // Node JS version!
+  let hashed = CryptoJS.MD5(saltedPassword).toString();            // HTML VERSION
+  //let hashed = crypto.createHash('md5').update(saltedPassword).digest('hex');     // Node JS version!
   
   //console.log(hashed);
   //displayHash(hashed);
@@ -63,7 +63,7 @@ const checkRedis = async () => {
   let newSalt = generateSalt();
   const sendData = {
     salt: newSalt,
-    hash: salt_and_hash(salt),
+    hash: salt_and_hash(newSalt),
     message: "PING"
   };
   const getParameters = new URLSearchParams(sendData)
@@ -73,7 +73,7 @@ const checkRedis = async () => {
 
     if (response.ok) {
       const jsonResponse = await response.text();
-      let redisResonse = jsonResponse.substring(42);
+      let redisResponse = jsonResponse.substring(42);
       console.log(redisResponse);
     } else {
       //responseMsg.innerHTML = "Request failed!";
@@ -95,7 +95,7 @@ const sendDataToRedis = async (inVar, payload) => {
 
   const sendData = {
     salt: newSalt,
-    hash: salt_and_hash(salt),
+    hash: salt_and_hash(newSalt),
     message: ("SET"+" "+inVar+" "+payload)
   };
 
@@ -109,7 +109,7 @@ const sendDataToRedis = async (inVar, payload) => {
 
     if (response.ok) {
       const jsonResponse = await response.text();
-      let redisResonse = jsonResponse.substring(42);
+      let redisResponse = jsonResponse.substring(42);
       console.log(redisResponse);
     } else {
       //responseMsg.innerHTML = "Request failed!";
@@ -132,7 +132,7 @@ const getFromRedis = async (inVar) => {
 
   const sendData = {
     salt: newSalt,
-    hash: salt_and_hash(salt),
+    hash: salt_and_hash(newSalt),
     message: ("GET"+" "+inVar)
   };
 
@@ -146,7 +146,7 @@ const getFromRedis = async (inVar) => {
 
     if (response.ok) {
       const jsonResponse = await response.text();
-      let redisResonse = jsonResponse.substring(42);
+      let redisResponse = jsonResponse.substring(42);
       console.log(redisResponse);
     } else {
       //responseMsg.innerHTML = "Request failed!";
