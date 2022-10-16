@@ -13,6 +13,14 @@ Created on 14 October 2022
 
 const pw = "A571C1DDA73DD";
 
+//let size = 0;
+//let fields = new Array(100);
+
+let selections = {};
+let keysString;
+let keys = [];
+
+
 
 /**************** NODE JS SETUP *****************************/
 
@@ -99,6 +107,8 @@ const sendDataToRedis = async (inVar, payload) => {
     message: ("SET"+" "+inVar+" "+payload)
   };
 
+  //console.log(sendData);
+
   const getParameters = new URLSearchParams(sendData)
 
   try {
@@ -135,6 +145,7 @@ const getFromRedis = async (inVar) => {
     hash: salt_and_hash(newSalt),
     message: ("GET"+" "+inVar)
   };
+  console.log(sendData);
 
   const getParameters = new URLSearchParams(sendData)
 
@@ -147,7 +158,87 @@ const getFromRedis = async (inVar) => {
     if (response.ok) {
       const jsonResponse = await response.text();
       let redisResponse = jsonResponse.substring(42);
-      console.log(redisResponse);
+      console.log(inVar.concat(" ").concat(redisResponse));  // This may not work with a numberical input at the moment
+    } else {
+      //responseMsg.innerHTML = "Request failed!";
+      throw new Error("Request failed!");
+    }
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+}
+
+const getAllKeysRedis = async () => {
+  //let responseMsg = document.getElementById('received');
+  
+  let url = "https://agile.bu.edu/ec500_scripts/redis.php?";
+  let newSalt = generateSalt();
+
+  const sendData = {
+    salt: newSalt,
+    hash: salt_and_hash(newSalt),
+    message: "GET keys"
+  };
+  //console.log(sendData);
+
+  const getParameters = new URLSearchParams(sendData);
+
+  try {
+
+    const response = await fetch(url + getParameters, {method: 'GET'});
+
+    //console.log(response);
+
+    if (response.ok) {
+
+      const textResponse = await response.text();
+      console.log(textResponse);
+      
+      const returnText = textResponse;
+
+      return returnText;
+      //keysString = textResponse;
+
+
+    } else {
+      //responseMsg.innerHTML = "Request failed!";
+      throw new Error("Request failed!");
+    }
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+}
+
+const sendKeysToRedis = async (userInputs) => {
+
+  const keys = Object.keys(userInputs).toString();
+  console.log(keys);  
+  let url = "https://agile.bu.edu/ec500_scripts/redis.php?";
+  let newSalt = generateSalt();
+
+  const sendData = {
+    salt: newSalt,
+    hash: salt_and_hash(newSalt),
+    message: ("SET keys "+keys)
+  };
+
+  const getParameters = new URLSearchParams(sendData);
+
+  try {
+
+    const response = await fetch(url + getParameters, {method: 'GET'});
+
+    if (response.ok) {
+      const textResponse = await response.text();
+      console.log(textResponse);
     } else {
       //responseMsg.innerHTML = "Request failed!";
       throw new Error("Request failed!");
@@ -168,6 +259,21 @@ function calculateSum(inputs, n) {
     }
     return total;
 }
+
+function parseKeysString(keys) {
+  return keys.split(",");
+}
+
+function checkInput() {  // Method checks if input is valid
+  // (1) checks that number is in appropriate range
+  // (2) checks that the sum with the new number is not greater than 100
+
+
+
+}
+
+
+
 
 
 /*************** TEMP FUNCTIONS ******************************/
@@ -191,6 +297,26 @@ const main = () => {
   // NEXT UP:
   // * find a way to save and retrieve values from Redis!
   checkRedis();
+  //let student = "student";
+  // for (let i = 1; i < 11; i++) {  
+  //   sendDataToRedis(student.concat(i), 10);
+  //   size++;
+  // }
+  // for (let k = 1; k < 11; k++) {
+  //   getFromRedis(student.concat(k));
+  // }
+  
+  selections['git1'] = 10;
+  selections['git2'] = 10;
+  selections['git3'] = 10;
+
+  sendKeysToRedis(selections);
+
+  let response = getAllKeysRedis();
+  keysString = response;
+  
+  console.log(keysString);
+  console.log(parseKeysString(keysString.substring(43)));
 	
 }
 
