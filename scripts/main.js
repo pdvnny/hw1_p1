@@ -172,6 +172,32 @@ const getFromRedis = async (inVar) => {
 
 }
 
+/* ------- FUNCTIONS FOR 'getAllKeysRedis' --------- */
+
+const networkSuccess = (response) => {
+  if (response.ok) {
+    return response.text();
+  }
+  throw new Error('Request failed!');
+}
+
+const networkFailure = (networkError) => {
+  console.log("Network Error");
+  console.log(networkError);
+  console.log(networkError.message);
+}
+
+const handleTextResponse = (textResponse) => {
+  //console.log("In handle method, " + textResponse);
+  keysString = textResponse.substring(43);
+  //console.log(keysString);
+  keys = parseKeysString(keysString);
+  console.log(keys);
+}
+
+// -----------------------------------------------
+
+
 const getAllKeysRedis = async () => {
   //let responseMsg = document.getElementById('received');
   
@@ -187,6 +213,12 @@ const getAllKeysRedis = async () => {
 
   const getParameters = new URLSearchParams(sendData);
 
+  const response = await fetch(url + getParameters, {method: 'GET'})
+      .then(networkSuccess, networkFailure)
+      .then(handleTextResponse);
+      // You can work with the response, but only in the async method!!
+
+  /*
   try {
 
     const response = await fetch(url + getParameters, {method: 'GET'});
@@ -214,6 +246,7 @@ const getAllKeysRedis = async () => {
     console.log(error);
 
   }
+  */
 
 }
 
@@ -231,13 +264,14 @@ const sendKeysToRedis = async (userInputs) => {
   };
 
   const getParameters = new URLSearchParams(sendData);
+  let textResponse;
 
   try {
 
     const response = await fetch(url + getParameters, {method: 'GET'});
 
     if (response.ok) {
-      const textResponse = await response.text();
+      textResponse = await response.text();
       console.log(textResponse);
     } else {
       //responseMsg.innerHTML = "Request failed!";
@@ -249,6 +283,8 @@ const sendKeysToRedis = async (userInputs) => {
     console.log(error);
 
   }
+
+  return textResponse;
 
 }
 
@@ -309,15 +345,15 @@ const main = () => {
   selections['git1'] = 10;
   selections['git2'] = 10;
   selections['git3'] = 10;
+  selections['git4'] = 10;
 
   sendKeysToRedis(selections);
 
-  let response = getAllKeysRedis();
-  keysString = response;
-  
-  console.log(keysString);
-  console.log(parseKeysString(keysString.substring(43)));
-	
+  getAllKeysRedis();
+  //console.log(keysString);
+  //console.log(parseKeysString(keysString));
+
+
 }
 
 main();
